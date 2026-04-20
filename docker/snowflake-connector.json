@@ -1,0 +1,24 @@
+{
+  "name": "snowflake-sink",
+  "config": {
+    "connector.class": "com.snowflake.kafka.connector.SnowflakeSinkConnector",
+    "tasks.max": "1",      #ingestion speed
+
+    "topics": "traffic.raw.events",
+
+    "snowflake.url.name": "${SNOWFLAKE_ACCOUNT}",
+    "snowflake.user.name": "${SNOWFLAKE_USER}",
+    "snowflake.private.key": "${SNOWFLAKE_PASSWORD}",
+
+    "snowflake.database.name": "TRAFFIC_DB",
+    "snowflake.schema.name": "BRONZE",
+    "snowflake.table.name": "RAW_EVENTS",
+
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+
+    "buffer.count.records": "1000",   #How many Kafka messages to collect before sending to Snowflake
+    "buffer.flush.time": "60" 	      #sends partial batch every 60 sec
+			#Kafka → Connect → Buffer → Snowflake
+  }
+}

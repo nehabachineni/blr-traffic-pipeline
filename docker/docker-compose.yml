@@ -1,0 +1,105 @@
+version: '3.8'  # Docker Compose file format version
+
+services:
+
+  zookeeper:  # Service name (used as hostname inside Docker network)
+    image: confluentinc/cp-zookeeper:7.5.0 # Prebuilt ZooKeeper image
+    container_name: zookeeper  # Fixed container name
+
+    ports:
+      - "2181:2181"  # Host:Container → exposes ZooKeeper on localhost:2181
+
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181  # Port ZooKeeper listens on
+
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]  # Check if port is open
+      interval: 10s   # Run check every 10 seconds
+      timeout: 5s     # Wait max 5 seconds per check
+      retries: 5      # Mark unhealthy after 5 failures
+
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data  # Persist ZooKeeper data
+
+
+  kafka:  # Kafka broker service
+    image: confluentinc/cp-kafka:7.5.0  # Kafka image
+    container_name: kafka
+
+    depends_on:
+      zookeeper:
+        condition: service_healthy  # Start only after ZooKeeper is healthy
+
+    ports:
+      - "9092:9092"  # Expose Kafka on localhost:9092
+
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Connect to ZooKeeper
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      # Tells clients how to connect to Kafka (producers/consumers/connectors)
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # Internal Kafka config (set to 1 for single broker setup)
+
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]  # Check Kafka port
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    volumes:
+      - kafka-data:/var/lib/kafka/data  # Persist Kafka messages & logs
+
+
+  connect:  # Kafka Connect service (for data pipelines)
+    image: confluentinc/cp-kafka-connect:7.5.0
+    container_name: kafka-connect
+
+    depends_on:
+      kafka:
+        condition: service_healthy  # Start after Kafka is ready
+
+    ports:
+      - "8083:8083"  # Expose REST API at localhost:8083
+
+    env_file:
+      - .env  # Load environment variables from .env file
+
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092  # Connect to Kafka broker
+
+      CONNECT_GROUP_ID: "connect-group"
+      # Group ID for Kafka Connect workers
+
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      # Internal topics used by Kafka Connect to store state
+
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      # Use JSON format for data serialization
+
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/jars"
+      # Where Kafka Connect looks for connector plugins
+
+    volumes:
+      - ./kafka-connect:/etc/kafka-connect
+      # Mount local folder for plugins/configs into container
+
+      - connect-data:/var/lib/kafka-connect
+      # Persist Kafka Connect internal data
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/connectors"]
+      # Check if REST API is responding
+
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+
+volumes:
+  zookeeper-data:  # Named volume for ZooKeeper persistence
+  kafka-data:      # Named volume for Kafka data (topics/messages)
+  connect-data:    # Named volume for Kafka Connect state
