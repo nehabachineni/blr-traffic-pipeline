@@ -35,7 +35,10 @@ services:
 
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Connect to ZooKeeper
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092 wrong, The localhost vs service name issue  
+      #localhost inside a container resolves to that container only, not the host or other services.
+      # Using the Docker Compose service name (kafka) lets the internal DNS resolve it correctly across containers.
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092 
       # Tells clients how to connect to Kafka (producers/consumers/connectors)
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -63,14 +66,23 @@ services:
       - "8083:8083"  # Expose REST API at localhost:8083
 
     env_file:
-      - .env  # Load environment variables from .env file
+      - ../.env  # Load environment variables from .env file
 
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka:9092  # Connect to Kafka broker
-
+      CONNECT_REST_PORT: 8083
+      # Port where Kafka Connect REST API is exposed inside the container
+      # You access it via: http://localhost:8083 
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      # The hostname Kafka Connect tells OTHER services to use when talking to it
+      # Important because Docker containers need a stable internal name for communication
+      # Without this, Kafka Connect refuses to start
       CONNECT_GROUP_ID: "connect-group"
       # Group ID for Kafka Connect workers
-
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      #three settings map directly to the three internal topics Connect tries to create on startup. The default is 3
       CONNECT_CONFIG_STORAGE_TOPIC: "connect-configs"
       CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
       CONNECT_STATUS_STORAGE_TOPIC: "connect-status"

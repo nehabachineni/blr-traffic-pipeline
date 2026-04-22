@@ -1,7 +1,7 @@
 {
   "name": "snowflake-sink",
   "config": {
-    "connector.class": "com.snowflake.kafka.connector.SnowflakeSinkConnector",
+    "connector.class": "com.snowflake.kafka.connector.SnowflakeSinkConnector", #reads from Kafka
     "tasks.max": "1",      #ingestion speed
 
     "topics": "traffic.raw.events",
@@ -14,7 +14,7 @@
     "snowflake.schema.name": "BRONZE",
     "snowflake.table.name": "RAW_EVENTS",
 
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",  #Interpret incoming bytes as JSON
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
 
     "buffer.count.records": "1000",   #How many Kafka messages to collect before sending to Snowflake

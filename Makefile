@@ -1,27 +1,28 @@
 
 #  DOCKER CONTROL
 
+COMPOSE = docker compose -f docker/docker-compose.yml
+
+up:
+	$(COMPOSE) up -d
+
+down:
+	$(COMPOSE) down
+
+ps:
+	$(COMPOSE) ps
+
+logs:
+	$(COMPOSE) logs -f connect
 
 # Start all services (Kafka, Zookeeper, Kafka Connect) in background
-up:
-	docker compose up -d
-
 # Stop and remove all containers (clean reset)
-down:
-	docker compose down
-
 # Show status of running containers
-ps:
-	docker compose ps
-
 # Stream logs from Kafka Connect (most common place for failures  -f: follows the logs in real time )
-logs:
-	docker compose logs -f kafka-connect
 
 
-# 
 #  KAFKA TOPIC MANAGEMENT
-# 
+
 
 # Creating required topics for the pipeline
 # - traffic.raw.events → main data stream
