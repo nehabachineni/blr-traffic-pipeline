@@ -92,14 +92,15 @@ services:
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       # Use JSON format for data serialization
 
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/jars"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/etc/kafka-connect/plugins"
       # Where Kafka Connect looks for connector plugins
-
+      CONNECT_CONFIG_PROVIDERS: env
+      CONNECT_CONFIG_PROVIDERS_ENV_CLASS: org.apache.kafka.common.config.provider.EnvVarConfigProvider
     volumes:
-      - ./kafka-connect:/etc/kafka-connect
+      # - ./kafka-connect:/etc/kafka-connect
       # Mount local folder for plugins/configs into container
-
-      - connect-data:/var/lib/kafka-connect
+       - ./kafka-connect/plugins:/etc/kafka-connect/plugins
+       - connect-data:/var/lib/kafka-connect
       # Persist Kafka Connect internal data
 
     healthcheck:

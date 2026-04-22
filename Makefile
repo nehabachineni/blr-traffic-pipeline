@@ -7,7 +7,7 @@ up:
 	$(COMPOSE) up -d
 
 down:
-	$(COMPOSE) down
+	$(COMPOSE) down -v
 
 ps:
 	$(COMPOSE) ps
@@ -31,17 +31,17 @@ create-topics:
 	# Runs Kafka CLI inside the Kafka container
 	# localhost:9092 works because Docker maps container port to host port, where Kafka broker is exposed
 	# || true prevents failure if topic already exists (idempotent)
-	docker exec -it kafka kafka-topics.sh --create \
+	docker exec -it kafka kafka-topics --create \
 	--topic traffic.raw.events \
 	--bootstrap-server localhost:9092 || true
 
-	docker exec -it kafka kafka-topics.sh --create \
+	docker exec -it kafka kafka-topics --create \
 	--topic traffic.dlq \
 	--bootstrap-server localhost:9092 || true
 
 # List all topics (quick verification step)
 list-topics:
-	docker exec -it kafka kafka-topics.sh --list \
+	docker exec -it kafka kafka-topics --list \
 	--bootstrap-server localhost:9092
 
 
@@ -52,8 +52,10 @@ list-topics:
 # Check which connectors are currently registered
 # Kafka Connect exposes a REST API at localhost:8083
 connector-status:
-	curl http://localhost:8083/connectors
-
+	curl http://localhost:8083/connector-plugins
+connector-status1:
+	curl http://localhost:8083/connectors/snowflake-sink/status
+#connector alive and healthy?
 # Registers (creates) a connector using JSON config
 # This activates the pipeline: Kafka → Snowflake
 
@@ -92,9 +94,9 @@ connector-status:
 
 
 register-connector:
-	curl -X POST http://localhost:8083/connectors \   
+	curl -X POST http://localhost:8083/connectors \
 	-H "Content-Type: application/json" \
-	-d @docker/kafka-connect/snowflake-connector.json
+	-d @docker/snowflake-connector.json
 
 # View last 50 lines of Kafka Connect logs (useful for debugging failures)
 connector-logs:
@@ -113,7 +115,7 @@ test-pipeline:
 	# pipe (|) sends it into Kafka producer CLI
 	# -i allows input streaming into container
 	echo '{"route_id":"test","live_seconds":1800,"base_seconds":900}' | \
-	docker exec -i kafka kafka-console-producer.sh \
+	docker exec -i kafka kafka-console-producer \
 	--topic traffic.raw.events \
 	--bootstrap-server localhost:9092
 

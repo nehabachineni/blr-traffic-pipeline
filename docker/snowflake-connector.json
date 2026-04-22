@@ -1,25 +1,25 @@
 {
   "name": "snowflake-sink",
   "config": {
-    "connector.class": "com.snowflake.kafka.connector.SnowflakeSinkConnector", #reads from Kafka
-    "tasks.max": "1",      #ingestion speed
+    "connector.class": "com.snowflake.kafka.connector.SnowflakeSinkConnector",
+    "tasks.max": "1",
 
     "topics": "traffic.raw.events",
 
-    "snowflake.url.name": "${SNOWFLAKE_ACCOUNT}",
-    "snowflake.user.name": "${SNOWFLAKE_USER}",
-    "snowflake.private.key": "${SNOWFLAKE_PRIVATE_KEY}",
+    "snowflake.url.name": "${env:SNOWFLAKE_ACCOUNT}",
+    "snowflake.user.name": "${env:SNOWFLAKE_USER}",
+    "snowflake.private.key": "${env:SNOWFLAKE_PRIVATE_KEY}",
 
-    "snowflake.database.name": "TRAFFIC_DB",
+    "snowflake.database.name": "TRAFFIC_PIPELINE",
     "snowflake.schema.name": "BRONZE",
-    "snowflake.table.name": "RAW_EVENTS",
+    "snowflake.table.name": "TRAFFIC_RAW",
 
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter",  #Interpret incoming bytes as JSON
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-
-    "buffer.count.records": "1000",   #How many Kafka messages to collect before sending to Snowflake
-    "buffer.flush.time": "60" 	      #sends partial batch every 60 sec
-			#Kafka → Connect → Buffer → Snowflake
+    "value.converter.schemas.enable": "false",
+    "key.converter.schemas.enable": "false",
+    "buffer.count.records": "1000",
+    "buffer.flush.time": "60"
   }
 }
-#docker loads .env into the container.
+
