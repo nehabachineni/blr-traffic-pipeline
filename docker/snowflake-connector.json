@@ -8,7 +8,7 @@
 
     "snowflake.url.name": "${SNOWFLAKE_ACCOUNT}",
     "snowflake.user.name": "${SNOWFLAKE_USER}",
-    "snowflake.private.key": "${SNOWFLAKE_PASSWORD}",
+    "snowflake.private.key": "${SNOWFLAKE_PRIVATE_KEY}",
 
     "snowflake.database.name": "TRAFFIC_DB",
     "snowflake.schema.name": "BRONZE",
@@ -22,3 +22,4 @@
 			#Kafka → Connect → Buffer → Snowflake
   }
 }
+#docker loads .env into the container.
