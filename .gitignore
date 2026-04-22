@@ -210,3 +210,5 @@ __marimo__/
 *.pyc
 docker/kafka-connect/plugins/*
 !docker/kafka-connect/plugins/.keep
+snowflake_private_key.pem
+snowflake_public_key.pem
