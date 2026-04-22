@@ -208,3 +208,5 @@ __marimo__/
 .env
 .DS_Store
 *.pyc
+docker/kafka-connect/plugins/*
+!docker/kafka-connect/plugins/.keep
