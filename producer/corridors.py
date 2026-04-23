@@ -5,7 +5,6 @@ Urban Traffic Pipeline — Corridor Definitions
 
 Each corridor represents a real logistics route in Bangalore.
 
-Rules:
 - No logic in this file
 - Only static definitions
 - Easy to extend (add/remove corridors without breaking anything)
