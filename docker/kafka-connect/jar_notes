@@ -1,0 +1,8 @@
+The Snowflake connector JAR contains the Snowflake ingest SDK which handles:
+1. opens HTTPS connection to Snowflake account URL
+2. signs request with your private key (JWT)
+3. batches records from Kafka topic
+4. POSTs them to Snowflake's streaming ingest API
+5. Snowflake confirms receipt
+6. Connect commits the offset back to Kafka
+
