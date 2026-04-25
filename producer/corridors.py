@@ -13,8 +13,8 @@ Each corridor represents a real logistics route in Bangalore.
 CORRIDORS = [
     {
         "route_id": "silk_board_to_hebbal",
-        "origin": "12.9176,77.6233",
-        "destination": "13.0358,77.5970",
+        "origin": {"lat": 12.9176,"lng":77.6233},
+        "destination": {"lat":13.0358,"lng":77.5970},
         "origin_label": "Silk Board Junction",
         "dest_label": "Hebbal Flyover",
         "tier": 1,
@@ -22,8 +22,8 @@ CORRIDORS = [
     },
     {
         "route_id": "nelamangala_to_hebbal",
-        "origin": "13.1200,77.3900",
-        "destination": "13.0358,77.5970",
+        "origin": {"lat":13.1200,"lng":77.3900},
+        "destination": {"lat":13.0358,"lng":77.5970},
         "origin_label": "Nelamangala Toll",
         "dest_label": "Hebbal Flyover",
         "tier": 1,
@@ -31,8 +31,8 @@ CORRIDORS = [
     },
     {
         "route_id": "orr_marathahalli_to_kr_puram",
-        "origin": "12.9591,77.6974",
-        "destination": "13.0050,77.6950",
+        "origin": {"lat":12.9591,"lng":77.6974},
+        "destination": {"lat":13.0050,"lng":77.6950},
         "origin_label": "Marathahalli Bridge",
         "dest_label": "KR Puram Bridge",
         "tier": 1,
@@ -40,8 +40,8 @@ CORRIDORS = [
     },
     {
         "route_id": "koramangala_to_attibele",
-        "origin": "12.9352,77.6245",
-        "destination": "12.7800,77.7700",
+        "origin": {"lat":12.9352,"lng":77.6245},
+        "destination": {"lat":12.7800,"lng":77.7700},
         "origin_label": "Koramangala",
         "dest_label": "Attibele",
         "tier": 2,
@@ -49,8 +49,8 @@ CORRIDORS = [
     },
     {
         "route_id": "dairy_circle_to_jigani",
-        "origin": "12.9400,77.5900",
-        "destination": "12.8000,77.6400",
+        "origin": {"lat":12.9400,"lng":77.5900},
+        "destination": {"lat":12.8000,"lng":77.6400},
         "origin_label": "Dairy Circle",
         "dest_label": "Jigani",
         "tier": 2,
