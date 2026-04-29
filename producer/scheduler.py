@@ -63,7 +63,7 @@ def get_poll_interval(hour:int, calls_today:int) ->int | None:
     everyday 6 am basline traffic unaware ETA is polled, reset() logic in main.py
 '''
 def should_fetch_baseline(hour: int, baseline_done: bool) -> bool:
-    return hour == 6 and not baseline_done
+    return hour == 5 and not baseline_done
 
 '''
 
