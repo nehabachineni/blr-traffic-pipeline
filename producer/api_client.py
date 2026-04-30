@@ -32,7 +32,7 @@ def build_body(corridor:dict)->dict:
             }
         },
         "travelMode": "DRIVE",
-        "routingPreference": "TRAFFIC_AWARE"
+        "routingPreference": "TRAFFIC_AWARE"      #IMPORTANT
     }
 
 
@@ -76,8 +76,9 @@ def parse_response(raw:dict)->dict:      #assumes received valid JSON
     - Uses try/except for network-level failures and status codes for API-level failures
 
 '''
-
+ 
 def get_travel_time(corridor:dict)->dict:
+  charged_attempts = 0
 
   headers = {
       
@@ -98,12 +99,14 @@ def get_travel_time(corridor:dict)->dict:
               timeout =10               #wait time atmost 10s for the API to respond, 
                                         #handle with exception ( timeout and connection errors)
           )
+          charged_attempts +=1     #google responded
 
           if response.status_code == 200:
               try:
                 raw = response.json()                #exception handling if response is not json, can raise ValueError
                 data = parse_response(raw)           # here, raw is already a valid dict
                 data["route_id"] = corridor["route_id"]
+                data["charged_attempts"] = charged_attempts
                 return data
               except ValueError:
                    if attempt < 2:
@@ -112,7 +115,9 @@ def get_travel_time(corridor:dict)->dict:
                    return {
                             "status": "failed",
                             "reason": "INVALID_JSON",
-                            "route_id": corridor["route_id"]
+                            "route_id": corridor["route_id"],
+                            "charged_attempts":charged_attempts
+
                         }
                 
           if response.status_code in [429, 500,503]:            #rate limit,server down, temp down
@@ -122,18 +127,21 @@ def get_travel_time(corridor:dict)->dict:
           return {                                             
               "status": "failed",
               "reason": f"HTTP_{response.status_code}",
-              "route_id": corridor["route_id"]
-
+              "route_id": corridor["route_id"],
+              "charged_attempts":charged_attempts
+              
           }
     
       except (requests.exceptions.Timeout ,requests.exceptions.ConnectionError) as e:
+          #charged_attemps NOT incremented as google never got these reqs
           if attempt < 2:    #retry only if another attempt is left, 
               time.sleep(30 * ( 2 ** attempt))
               continue
           return{
               "status":"failed",
               "reason": type(e).__name__.upper(),          #every exception is a class in python, __name__ built in attribute
-              "route_id": corridor["route_id"]
+              "route_id": corridor["route_id"],
+              "charged_attempts":charged_attempts
           }
       
       
@@ -141,12 +149,14 @@ def get_travel_time(corridor:dict)->dict:
           return{
               "status":"failed",
               "reason":f"UNEXPECTED_{str(e)}",
-              "route_id": corridor["route_id"]
+              "route_id": corridor["route_id"],
+              "charged_attempts":charged_attempts
               
           }
   return {
       
       "status":"failed",
       "reason":"MAX_RETRIES",
-      "route_id": corridor["route_id"]
+      "route_id": corridor["route_id"],
+      "charged_attempts":charged_attempts
   }
