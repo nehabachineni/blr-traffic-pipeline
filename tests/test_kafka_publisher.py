@@ -19,22 +19,48 @@ def test_publish_event_success(mock_get_producer):
 
      assert result is True
 
+     mock_get_producer.return_value.send.assert_called_with(
+        "traffic.raw.events", 
+        key="test",
+        value={"status": "ok", "ETA": 1200, "route_id": "test"}
+    )
 
 
+@patch("producer.kafka_publisher.time.sleep", return_value =None)
 @patch("producer.kafka_publisher._get_producer")
-def test_publish_event_failure(mock_get_producer):
+def test_publish_event_failure(mock_get_producer, mock_sleep):
 
-    mock_get_producer.return_value.send.return_value.get.side_effect = Exception("Timeout") 
+    mock_future = mock_get_producer.return_value.send.return_value 
+    mock_future.get.side_effect = Exception("Timeout") 
 
     result = publish_event("test",{"status": "ok", "ETA": 1200, "route_id": "test"})
 
     assert result is False
-    mock_get_producer.return_value.send.assert_called_once_with(
+    assert mock_future.get.call_count ==3
+    mock_get_producer.return_value.send.assert_called_with(
+        "traffic.raw.events", 
+        key="test",
+        value={"status": "ok", "ETA": 1200, "route_id": "test"}
+    )
+
+@patch("producer.kafka_publisher.time.sleep", return_value =None)
+@patch("producer.kafka_publisher._get_producer")
+def test_publish_event_retry_success(mock_get_producer,mock_sleep):
+
+    mock_future = mock_get_producer.return_value.send.return_value 
+    mock_future.get.side_effect = [Exception("fail"), None]
+
+    result = publish_event("test",{"status": "ok", "ETA": 1200, "route_id": "test"})
+
+    assert result is True
+    assert mock_future.get.call_count == 2
+    mock_get_producer.return_value.send.assert_called_with(
         "traffic.raw.events", 
         key="test",
         value={"status": "ok", "ETA": 1200, "route_id": "test"}
     )
 '''
+    
 
    Patches datetime.now to provide a deterministic timestamp, 
    preventing test failure due to execution lag between 

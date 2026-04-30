@@ -2,9 +2,9 @@ import os , json, logging
 from datetime import datetime, timezone
 from kafka import KafkaProducer
 from dotenv import load_dotenv
-
+import time
 load_dotenv(".env")
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)    #Logger object for this module
 
 MAIN_TOPIC = os.getenv("KAFKA_TOPIC","traffic.raw.events")    #defaults
 DLQ_TOPIC = os.getenv("KAFKA_DLQ_TOPIC","traffic.dlq")
@@ -66,6 +66,10 @@ def _get_producer():     #internal implementation detail, protects singleton
         False if anything went wrong (network, timeout, broker down)
 
 
+
+        Might want to add retry loop !! , added in 
+
+
 '''
 
 def publish_event(route_id:str, payload:dict)->bool:
@@ -79,29 +83,32 @@ def publish_event(route_id:str, payload:dict)->bool:
     #.get() unblocks and returns
     
 
-
-    try:                                                                
+    for attempt in range(3):
+        try:                                                                
                                                            # _get_producer() creates (or reuses) KafkaProducer
                                                            # background thread already running from first instantiation
-        future = _get_producer().send(                     #.send() returns a FutureRecordMetadata object (kafka-python library class)
+            future = _get_producer().send(                     #.send() returns a FutureRecordMetadata object (kafka-python library class)
                 MAIN_TOPIC,
                 key= route_id,
                 value= payload
-            ) 
+                ) 
         
 
         # .get() blocks here ,waits (for the background thread to resolve) up to 10s for Kafka to confirm receipt
         # turns the async send into synchronous so that failures are known
         # raises exception if timeout or broker error
         # .get()  is a method method of FutureRecordMetadata class
-        future.get(timeout =10)                         
+            future.get(timeout =10)                         
 
-        return True      #Kafka confirmed, message written to partition
+            return True      #Kafka confirmed, message written to partition
         
 
-    except Exception as e:
-        log.error(f"Kafka MAIN publish failed: {type(e).__name__}: {e}")
-        return False
+        except Exception as e:
+            if attempt < 2:
+                time.sleep(2** attempt)
+                continue
+            log.error(f"Kafka MAIN publish failed: {type(e).__name__}: {e}")
+            return False
 
 
 
@@ -111,14 +118,14 @@ def publish_event(route_id:str, payload:dict)->bool:
     Sends bad/malformed data to DLQ topic.
     Adds metadata for debugging.
 
-    Called by main.py when api_client.py returns status="dlq" with the reason.
+    Called by main.py when api_client.py returns status="dlq" .
     
 
 """
 
 def publish_to_dlq(payload: dict) -> bool:
     
-    route_id = payload.get("route_id", "unknown")      #could be unknown due to NO_ROUTES error 
+    route_id = payload.get("route_id", "unknown")      
 
     dlq_payload = {
         **payload,                              # spreads all of payload's key value pairs here, dict unpacking, avoids mutating og dict
