@@ -60,11 +60,11 @@ def test_poll_interval_emergency_mode():
 # 3. should_fetch_baseline tests
 
 
-def test_baseline_runs_at_6am():
-    assert should_fetch_baseline(6, False) is True
+def test_baseline_runs_at_5am():
+    assert should_fetch_baseline(5, False) is True
 
 def test_baseline_skipped_if_done():
-    assert should_fetch_baseline(6, True) is False
+    assert should_fetch_baseline(5, True) is False
 
 def test_baseline_not_at_other_hours():
     assert should_fetch_baseline(7, False) is False

@@ -49,11 +49,11 @@ def get_poll_interval(hour:int, calls_today:int) ->int | None:
     window = get_window(hour)
     base = FREQUENCY[window]
 
-    if base is None:
+    if base is None:            #blackout
         return None
     
    
-    if calls_today >= 120:        #cut off, polls at 60 min irrespective of hour window
+    if calls_today >= 120:        #cut off, polls at double the freq irrespective of hour window
         return base * 2
     else:
         return base
