@@ -32,8 +32,9 @@ def fake_corridors():
 
 #1 happy path for baseline , all fine , pushed to cache
 
+@patch("producer.main.save_baseline")
 @patch("producer.main.get_travel_time")
-def test_fetch_baseline_all_ok(mock_api, reset_state):
+def test_fetch_baseline_all_ok(mock_api,mock_save, reset_state):
 
     def api_ok(c):
         return {
@@ -50,13 +51,15 @@ def test_fetch_baseline_all_ok(mock_api, reset_state):
     assert len(main.baseline_cache) == 5
     assert main.calls_today == 5
     assert main.baseline_done is True
+    assert mock_save.call_count == 1        # only saved after for loop ends, only written in once
 
 
 #2 baseline , mixed api responses, push to dlq + cache
 
+@patch("producer.main.save_baseline")
 @patch("producer.main.publish_to_dlq")
 @patch("producer.main.get_travel_time")
-def test_fetch_baseline_mixed(mock_api,mock_dlq,reset_state):
+def test_fetch_baseline_mixed(mock_api,mock_dlq,mock_save,reset_state):
 
     def api_mixed(c):
         rid = c["route_id"]
@@ -69,12 +72,14 @@ def test_fetch_baseline_mixed(mock_api,mock_dlq,reset_state):
 
     mock_api.side_effect = api_mixed
 
+
     with patch("producer.main.CORRIDORS", fake_corridors()):
         main.fetch_baseline()
 
     assert len(main.baseline_cache) == 1     #only 1 with status ok
     assert mock_dlq.call_count ==1           #only one dlq (rid r2)
     assert main.calls_today == 2             #3 failed calls
+    assert mock_save.call_count == 1         
 
 
 #3 happy path for poll corridors, variations in baseline cache
