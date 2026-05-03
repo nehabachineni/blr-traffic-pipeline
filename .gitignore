@@ -213,3 +213,6 @@ docker/kafka-connect/plugins/*
 snowflake_private_key.pem
 snowflake_public_key.pem
 
+producer/baseline_backup.json
+snowflake_private_key.pem
+*.pem

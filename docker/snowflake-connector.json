@@ -24,8 +24,8 @@
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
     "key.converter.schemas.enable": "false",
-    "buffer.count.records": "1000",
-    "buffer.flush.time": "60"
+    "buffer.count.records": "100",
+    "buffer.flush.time": "30"
   }
 }
 

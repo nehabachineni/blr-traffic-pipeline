@@ -132,7 +132,7 @@ services:
       kafka:
         condition: service_healthy
     env_file:
-      - .env
+      - ../.env
     #Bind mount, maps a file on host to a path in the container 
     volumes:
       - ../producer/baseline_backup.json:/app/baseline_backup.json
