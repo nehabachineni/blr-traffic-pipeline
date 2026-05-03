@@ -38,9 +38,19 @@ services:
       # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092 wrong, The localhost vs service name issue  
       #localhost inside a container resolves to that container only, not the host or other services.
       # Using the Docker Compose service name (kafka) lets the internal DNS resolve it correctly across containers.
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092 
-      # Tells clients how to connect to Kafka (producers/consumers/connectors)
+      # Maps the security protocols for the two listeners
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
 
+      # Defines the listeners (how the container listens)
+      KAFKA_LISTENERS: LISTENER_INTERNAL://0.0.0.0:29092,LISTENER_EXTERNAL://0.0.0.0:9092
+
+      # Defines the ADVERTISED listeners (how clients find Kafka)
+      # Internal clients (Connect) use kafka:29092
+      # External clients (Python script) use localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka:29092,LISTENER_EXTERNAL://localhost:9092
+
+      # Tells Kafka which listener the brokers use to talk to each other
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       # Internal Kafka config (set to 1 for single broker setup)
 
@@ -69,7 +79,9 @@ services:
       - ../.env  # Load environment variables from .env file
 
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka:9092  # Connect to Kafka broker
+      #CONNECT_BOOTSTRAP_SERVERS: kafka:9092  # Connect to Kafka broker
+      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
+      
       CONNECT_REST_PORT: 8083
       # Port where Kafka Connect REST API is exposed inside the container
       # You access it via: http://localhost:8083 

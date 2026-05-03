@@ -20,7 +20,7 @@
    "errors.log.enable": "true",
    "errors.log.include.messages": "true",
 
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
     "key.converter.schemas.enable": "false",
