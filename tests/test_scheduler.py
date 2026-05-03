@@ -14,13 +14,13 @@ from producer.scheduler import (
 
 
 def test_window_morning():
-    assert get_window(8) == "MORNING PEAK"
+    assert get_window(8) == "MORNING_PEAK"
 
 def test_window_midday():
     assert get_window(12) == "MIDDAY"
 
 def test_window_evening():
-    assert get_window(18) == "EVENING PEAK"
+    assert get_window(18) == "EVENING_PEAK"
 
 def test_window_blackout():
     assert get_window(3) == "BLACKOUT"
@@ -29,7 +29,7 @@ def test_window_boundary_morning_midday():
     assert get_window(11) == "MIDDAY"
 
 def test_window_boundary_midday_evening():
-    assert get_window(16) == "EVENING PEAK"
+    assert get_window(16) == "EVENING_PEAK"
 
 
 
@@ -49,7 +49,7 @@ def test_poll_interval_blackout():
     assert get_poll_interval(2, 0) is None
 
 def test_poll_interval_hard_cap():
-    assert get_poll_interval(10, 160) is None
+    assert get_poll_interval(10, 155) is None
 
 def test_poll_interval_emergency_mode():
     # 120 triggers slowdown
@@ -116,3 +116,14 @@ def test_budget_projection():
 def test_budget_free_tier():
     status = get_budget_status(10)
     assert status["within_free_tier"] is True
+
+def test_budget_emergency_at_boundary():
+    status = get_budget_status(119)
+    status2 = get_budget_status(120)
+    assert status["mode"] == "NORMAL"
+    assert status["calls_remaining"] == 41
+    assert status2["mode"] == "EMERGENCY"
+    
+
+
+

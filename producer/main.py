@@ -37,7 +37,7 @@ def midnight_reset(today):
      calls_today = 0
      baseline_done = False
      baseline_cache = {} # today
-     #baseline_backup = {} #loses purpose if reset , don't
+     #baseline_backup = {} #loses purpose if reset , don't . Will contain most recent successful baselines
      last_polled = {}
      last_reset_day = today
      log.info(f"MIDNIGHT RESET COMPLETE AT {datetime.now()}")
@@ -106,7 +106,7 @@ def fetch_baseline():
 
 
 
-def poll_corridors(interval:int | None):           #None -> Blackout times
+def poll_corridors(interval:int):           #None -> Blackout times
     global calls_today
     #log.info("Fetching corridor ETAs......")
 
@@ -154,7 +154,7 @@ def poll_corridors(interval:int | None):           #None -> Blackout times
                 if not success_dlq:
                      log.error(f"DLQ PUBLISH FAILED {route_id}")
 
-                last_polled[route_id] = datetime.now()                  #updating regardless here 
+                last_polled[route_id] = datetime.now()                  #updating regardless here, API call was consumed 
                
         else: 
            

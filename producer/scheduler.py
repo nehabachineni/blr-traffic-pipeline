@@ -9,7 +9,7 @@ The scheduler decides.
 # # EVENING_PEAK 16:00-23:00 30 min interval 
 # # BLACKOUT 23:00-07:00 no polling # # Budget: 
 # # Pro SKU free tier: 5,000 calls/month 
-# # Daily target: 135 calls 
+# # Daily target: 135 calls + 5 baseline calls
 # # Hard cap: 160 calls (safety margin)
 
 
@@ -21,18 +21,18 @@ from datetime import datetime, timedelta
 
 def get_window(hour:int)->str:
     if 7 <= hour < 11:
-        return "MORNING PEAK"
+        return "MORNING_PEAK"
     if 11 <= hour < 16:
         return "MIDDAY"
     if 16 <= hour < 23:
-        return "EVENING PEAK"
+        return "EVENING_PEAK"
     else:
         return "BLACKOUT"
     
 FREQUENCY = {
-    "MORNING PEAK" : 30,
+    "MORNING_PEAK" : 30,
     "MIDDAY"       : 60,
-    "EVENING PEAK" : 30,
+    "EVENING_PEAK" : 30,
     "BLACKOUT"     : None
 
 }
