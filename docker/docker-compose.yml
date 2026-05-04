@@ -133,7 +133,10 @@ services:
         condition: service_healthy
     env_file:
       - ../.env
+
     #Bind mount, maps a file on host to a path in the container 
+    environment:
+      TZ: Asia/Kolkata
     volumes:
       - ../producer/baseline_backup.json:/app/baseline_backup.json
 
